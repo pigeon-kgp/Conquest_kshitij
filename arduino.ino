@@ -1,6 +1,6 @@
-int motorLeft[3]={};
-int motorRight[3]={};
-int led=9;
+int motorLeft[3]={3,4};
+int motorRight[3]={5,6};
+int led=13;
 int PWM(int input)
 {
   return (input/5)*1023;
@@ -10,21 +10,21 @@ void forward(int pwm=1023)
     analogWrite(motorLeft[2], pwm);
     analogWrite(motorRight[2], pwm);
     
-    digitalWrite(motorLeft[1], HIGH);
-    digitalWrite(motorLeft[0], LOW);
-    digitalWrite(motorRight[1], HIGH);
-    digitalWrite(motorRight[0], LOW);
+    digitalWrite(motorLeft[0], HIGH);
+    digitalWrite(motorLeft[1], LOW);
+    digitalWrite(motorRight[0], HIGH);
+    digitalWrite(motorRight[1], LOW);
 }
 
 void backward(int pwm=1023)
 {
     analogWrite(motorLeft[2], pwm);
     analogWrite(motorRight[2], pwm);
-    
-    digitalWrite(motorLeft[0], HIGH);
-    digitalWrite(motorLeft[1], LOW);
-    digitalWrite(motorRight[0], HIGH);
-    digitalWrite(motorRight[1], LOW);
+
+    digitalWrite(motorLeft[1], HIGH);
+    digitalWrite(motorLeft[0], LOW);
+    digitalWrite(motorRight[1], HIGH);
+    digitalWrite(motorRight[0], LOW);
 }
 void left(int pwm=1023)
 {
@@ -34,7 +34,7 @@ void left(int pwm=1023)
     digitalWrite(motorLeft[0], HIGH);
     digitalWrite(motorLeft[1], LOW);
     digitalWrite(motorRight[1], HIGH);
-    digitalWrite(motorRight[0], LOW);
+    digitalWrite(motorRight[0], HIGH);
 }
 
 void right(int pwm=1023)
@@ -42,7 +42,7 @@ void right(int pwm=1023)
     analogWrite(motorLeft[2], pwm);
     analogWrite(motorRight[2], pwm);
     
-    digitalWrite(motorLeft[1], HIGH);
+    digitalWrite(motorLeft[1], LOW);
     digitalWrite(motorLeft[0], LOW);
     digitalWrite(motorRight[0], HIGH);
     digitalWrite(motorRight[1], LOW);
@@ -51,6 +51,11 @@ void Stop()
 {
     analogWrite(motorLeft[2], 0);
     analogWrite(motorRight[2], 0);
+
+    digitalWrite(motorLeft[1], HIGH);
+    digitalWrite(motorLeft[0], HIGH);
+    digitalWrite(motorRight[0], HIGH);
+    digitalWrite(motorRight[1], HIGH);
 }
 void blink()
 {
@@ -59,8 +64,9 @@ void blink()
     {
         digitalWrite(led,voltage);
         voltage=1-voltage;
-        delay(1000);
+        delay(300);
     }
+    Stop();
 }
 
 void setup()
@@ -68,9 +74,9 @@ void setup()
   Serial.begin(9600);
 
   pinMode(led,OUTPUT);
-  for(int i = 0;i < 3;i++)
+  for(int i = 0;i < 2;i++)
   pinMode(motorLeft[i],OUTPUT);
-   for(int i = 0;i < 3;i++)
+   for(int i = 0;i < 2;i++)
   pinMode(motorRight[i],OUTPUT);
 
 }
@@ -79,8 +85,10 @@ void loop()
 {
     if(Serial.available()>0)
     {
-        input=Serial.read();
+     input=Serial.read();
  
+
+
         switch(input)
         {
           case 'w':forward();
@@ -94,7 +102,7 @@ void loop()
           case 'b':Stop();
                    blink();
                    break;
-          default:Stop();
+          case 'S':Stop();
                   break;                  
         };
         Serial.println(input);
