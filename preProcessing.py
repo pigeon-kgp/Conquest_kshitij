@@ -102,7 +102,6 @@ def blob__Detec__location(image):
     for i in river:
         x=int(i.pt[0])
         y=int(i.pt[1])
-        riverList.append([x,y])
         for i in xrange(-s,s):
             for j in xrange(-s,s):
                 try:
@@ -135,6 +134,16 @@ img=cv2.imread("2.png",cv2.IMREAD_COLOR)
 
 blob=blob__Detec(img)
 centroid=blob__Detec__location(blob)
+
+HSV = cv2.cvtColor(centroid, cv2.COLOR_BGR2HSV)
+Red={'min':(0,0,245),'max':(0,0,256)}
+red=cv2.inRange(HSV,Red['min'],Red['max'])
+params = cv2.SimpleBlobDetector_Params()
+detector=cv2.SimpleBlobDetector(params)
+rivers=detector.detect(255-red)
+for i in rivers:
+                x=i.pt[0]; y=i.pt[1]
+                riverList.append([x,y])
 
 cv2.imshow('centroid',centroid)
 cv2.imshow('image',blob)
