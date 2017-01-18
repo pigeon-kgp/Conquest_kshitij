@@ -1,7 +1,72 @@
 import cv2
 import numpy as np
 from math import sqrt
+from math import pow
 from copy import copy
+
+def Distf(item):
+    dist=sqrt(pow(item[0]-townList[0][0],2)+pow(item[1]-townList[0][1],2))
+    return dist*0.75
+def Distw(item):
+    dist=sqrt(pow(item[0]-townList[0][0],2)+pow(item[1]-townList[0][1],2))
+    return dist
+def Distn(item):
+    dist=sqrt(((globx2-globx)**2)+((globy2-globy)**2))
+    return dist
+def Dist(x1,y1,x2,y2):
+    return (sqrt((x1-x2)**2+(y1-y2)**2))
+
+def clearance(xorg,yorg,xfin,yfin):
+    m=float(yfin-yorg)/(xfin-xorg)
+    c=yfin-m*xfin
+    x=xorg; y=yorg; count=1
+    if (xfin<xorg): count=-1
+    olddist=Dist(x,y,xfin,yfin)
+    while (True):
+        y=(m*x+c)
+        if (centroid[int(y),int(x)][0]==255 and centroid[int(y),int(x)][1]==255 and centroid[int(y),int(x)][2]==255):
+            return ([int(x),int(y)])
+        if (Dist(x,y,xfin,yfin)<olddist-2 or Dist(x,y,xfin,yfin)<8):
+            return 1
+        else:
+            olddist=Dist(x,y,xfin,yfin)
+        centroid[int(y),int(x)]=[255,255,0]
+        x+=count
+
+def pathPlanning(points,foodList,woodList,riverList,town):
+    foodList.sort(key=Distf)
+    woodList.sort(key=Distw)
+    netList=foodList+woodList
+    netList.sort()
+    print "\nNet: "+str(netList)
+    xorg=town[0]; yorg=town[1]; flag=0
+    for i in netList:
+        #print i
+        #if (int(i[0])==486): break
+        pointstemp=[]; riverHere=copy(riverList)
+        while(True):
+            xfin=i[0]; yfin=i[1]
+            if flag==0:
+                place=clearance(xorg,yorg,xfin,yfin)
+            else:
+                place=clearance(globx,globy,xfin,yfin)
+            if (type(place) is int):
+                flag=0
+            else:
+                globx=place[0]; globy=place[1]
+                globx2=xfin; globy2=yfin
+                riverHere.sort(key=Distn)
+                for j in riverHere:
+                    check=clearance(xorg,yorg,j[0],j[1])
+                    if (type(check) is int):
+                        globx=j[0]; globy=j[1]
+                        pointstemp.append([j[0],j[1]])
+                        riverHere.remove(j)
+                        break
+                flag=1
+            if flag==0: break
+        points.append([[xorg,yorg]]+[pointstemp]+[[i[0],i[1]]]+[pointstemp[::-1]]+[[xorg,yorg]])
+
 
 
 def AssignColor(event,x,y,flags,param):
@@ -128,15 +193,15 @@ def blob__Detec__location(image):
 
 
 
-foodList=[]; woodList=[]; townList=[]; riverList=[]
+foodList=[]; woodList=[]; townList=[]; riverList=[]; points=[]
 img=cv2.imread("2.png",cv2.IMREAD_COLOR)
-
+globx=globx2=0; globy=globy2=0
 
 blob=blob__Detec(img)
 centroid=blob__Detec__location(blob)
 
 HSV = cv2.cvtColor(centroid, cv2.COLOR_BGR2HSV)
-Red={'min':(0,0,245),'max':(0,0,256)}
+Red={'min':(0,100,100),'max':(20,255,255)}
 red=cv2.inRange(HSV,Red['min'],Red['max'])
 params = cv2.SimpleBlobDetector_Params()
 detector=cv2.SimpleBlobDetector(params)
@@ -145,11 +210,14 @@ for i in rivers:
                 x=i.pt[0]; y=i.pt[1]
                 riverList.append([x,y])
 
-cv2.imshow('centroid',centroid)
+
+cv2.imshow('reds',255-red)
 cv2.imshow('image',blob)
 print "\nFood: "+str(foodList)
 print "\nWood: "+str(woodList)
 print "\nTown: "+str(townList)
 print "\nRiver: "+str(riverList)
-
+pathPlanning(points,foodList,woodList,riverList,townList[0])
+print "\nPath: "+str(points)
+cv2.imshow('centroid',centroid)
 cv2.waitKey(0)
