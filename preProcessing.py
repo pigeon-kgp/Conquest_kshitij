@@ -3,6 +3,7 @@ import numpy as np
 from math import sqrt
 from math import pow
 from copy import copy
+import os
 foodList=[]; woodList=[]; townList=[]; riverList=[]; points=[]
 
 def Disth(item):
@@ -53,7 +54,7 @@ def pathPlanning(town):
     xorg=town[0]; yorg=town[1]; flag=0
     for i in netList:
         #print i
-        #if (int(i[0])==486): break
+        if (int(i[0])==487): break
         pointstemp=[]; riverHere=copy(riverList)
         while(True):
             xfin=i[0]; yfin=i[1]
@@ -76,7 +77,7 @@ def pathPlanning(town):
                         break
                 flag=1
             if flag==0: break
-        points.append([[xorg,yorg]]+pointstemp+[[i[0],i[1]]]+pointstemp[::-1]+[[xorg,yorg]])
+        points.extend([[xorg,yorg],pointstemp,[i[0],i[1]],1,pointstemp[::-1],[xorg,yorg],1])
 
 
 
@@ -205,7 +206,7 @@ def blob__Detec__location(image):
 
 
 
-img=cv2.imread("1.png",cv2.IMREAD_COLOR)
+img=cv2.imread("2.png",cv2.IMREAD_COLOR)
 globx=globx2=0; globy=globy2=0
 
 blob=blob__Detec(img)
@@ -214,14 +215,21 @@ centroid=blob__Detec__location(blob)
 HSV = cv2.cvtColor(centroid, cv2.COLOR_BGR2HSV)
 Red={'min':(0,100,100),'max':(20,255,255)}
 red=cv2.inRange(HSV,Red['min'],Red['max'])
-params = cv2.SimpleBlobDetector()
-rivers=params.detect(255-red)
-for i in rivers:
-                x=i.pt[0]; y=i.pt[1]
-                riverList.append([x,y])
+#params = cv2.SimpleBlobDetector()
+#rivers=params.detect(red)
+#for i in rivers:
+#                x=i.pt[0]; y=i.pt[1]
+#                riverList.append([x,y])
 
-
-cv2.imshow('reds',255-red)
+cv2.imwrite("toread.jpg",red)
+os.system("./shapeslope")
+myfile=open("rivers.txt",'r')
+while(1):
+    line=myfile.readline()
+    if not line: break
+    riverList.append([int(line.split(' ')[0]),int(line.split(' ')[1])])
+myfile.close()
+cv2.imshow('reds',red)
 cv2.imshow('image',blob)
 print "\nFood: "+str(foodList)
 print "\nWood: "+str(woodList)
