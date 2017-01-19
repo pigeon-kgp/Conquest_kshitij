@@ -3,13 +3,14 @@ import numpy as np
 from math import sqrt
 from math import pow
 from copy import copy
+foodList=[]; woodList=[]; townList=[]; riverList=[]; points=[]
 
-def Distf(item):
-    dist=sqrt(pow(item[0]-townList[0][0],2)+pow(item[1]-townList[0][1],2))
-    return dist*0.75
-def Distw(item):
-    dist=sqrt(pow(item[0]-townList[0][0],2)+pow(item[1]-townList[0][1],2))
-    return dist
+def Disth(item):
+    dist=sqrt(((item[0]-townList[0][0])**2)+((item[1]-townList[0][1])**2))
+    if item[2]=="food":
+        return dist*0.75
+    else:
+        return dist
 def Distn(item):
     dist=sqrt(((globx2-globx)**2)+((globy2-globy)**2))
     return dist
@@ -19,28 +20,35 @@ def Dist(x1,y1,x2,y2):
 def clearance(xorg,yorg,xfin,yfin):
     try:
         m=float(yfin-yorg)/(xfin-xorg)
+        c=yfin-m*xfin
+        x=xorg; y=yorg; count=1
+        if (xfin<xorg): count=-1
+        olddist=Dist(x,y,xfin,yfin)
+        while (True):
+            y=(m*x+c)
+            if (centroid[int(y),int(x)][0]==255 and centroid[int(y),int(x)][1]==255 and centroid[int(y),int(x)][2]==255):
+                return ([int(x),int(y)])
+            if (Dist(x,y,xfin,yfin)<olddist-2 or Dist(x,y,xfin,yfin)<8):
+                return 1
+            else:
+                olddist=Dist(x,y,xfin,yfin)
+            centroid[int(y),int(x)]=[255,255,0]
+            x+=count
     except:
-        m=99999999
-    c=yfin-m*xfin
-    x=xorg; y=yorg; count=1
-    if (xfin<xorg): count=-1
-    olddist=Dist(x,y,xfin,yfin)
-    while (True):
-        y=(m*x+c)
-        if (centroid[int(y),int(x)][0]==255 and centroid[int(y),int(x)][1]==255 and centroid[int(y),int(x)][2]==255):
-            return ([int(x),int(y)])
-        if (Dist(x,y,xfin,yfin)<olddist-2 or Dist(x,y,xfin,yfin)<8):
-            return 1
-        else:
-            olddist=Dist(x,y,xfin,yfin)
-        centroid[int(y),int(x)]=[255,255,0]
-        x+=count
+        x=xorg; y=yorg; count=1
+        if (yfin<yorg): count=-1
+        while (True):
+                if (centroid[int(y),int(x)][0]==255 and centroid[int(y),int(x)][1]==255 and centroid[int(y),int(x)][2]==255):
+                    return ([int(x),int(y)])
+                if Dist(x,y,xfin,yfin)<8:
+                    return 1
+                centroid[int(y),int(x)]=[255,255,0]
+                y+=count
 
-def pathPlanning(points,foodList,woodList,riverList,town):
-    foodList.sort(key=Distf)
-    woodList.sort(key=Distw)
+def pathPlanning(town):
+    global foodList; global woodList
     netList=foodList+woodList
-    netList.sort()
+    netList.sort(key=Disth)
     print "\nNet: "+str(netList)
     xorg=town[0]; yorg=town[1]; flag=0
     for i in netList:
@@ -139,7 +147,7 @@ def blob__Detec__location(image):
     woods=detector.detect(255-yellow)
     for i in woods:
                 x=i.pt[0]; y=i.pt[1]
-                woodList.append([x,y])
+                woodList.append([x,y,"wood"])
     for i in woods:
         new_img[int(i.pt[1]),int(i.pt[0])]=[0,255,0]
         new_img[int(i.pt[1])+1,int(i.pt[0])+1]=[0,255,0]
@@ -153,7 +161,7 @@ def blob__Detec__location(image):
     food=detector.detect(255-yellow)
     for i in food:
             x=i.pt[0]; y=i.pt[1]
-            foodList.append([x,y])
+            foodList.append([x,y,"food"])
     for i in food:
         new_img[int(i.pt[1]),int(i.pt[0])]=[255,255,0]
         new_img[int(i.pt[1])+1,int(i.pt[0])+1]=[255,255,0]
@@ -196,7 +204,7 @@ def blob__Detec__location(image):
 
 
 
-foodList=[]; woodList=[]; townList=[]; riverList=[]; points=[]
+
 img=cv2.imread("1.png",cv2.IMREAD_COLOR)
 globx=globx2=0; globy=globy2=0
 
@@ -219,7 +227,7 @@ print "\nFood: "+str(foodList)
 print "\nWood: "+str(woodList)
 print "\nTown: "+str(townList)
 print "\nRiver: "+str(riverList)
-pathPlanning(points,foodList,woodList,riverList,townList[0])
+pathPlanning(townList[0])
 print "\nPath: "+str(points)
 cv2.imshow('centroid',centroid)
 cv2.waitKey(0)
