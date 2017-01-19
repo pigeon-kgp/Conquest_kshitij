@@ -17,7 +17,10 @@ def Dist(x1,y1,x2,y2):
     return (sqrt((x1-x2)**2+(y1-y2)**2))
 
 def clearance(xorg,yorg,xfin,yfin):
-    m=float(yfin-yorg)/(xfin-xorg)
+    try:
+        m=float(yfin-yorg)/(xfin-xorg)
+    except:
+        m=99999999
     c=yfin-m*xfin
     x=xorg; y=yorg; count=1
     if (xfin<xorg): count=-1
@@ -65,7 +68,7 @@ def pathPlanning(points,foodList,woodList,riverList,town):
                         break
                 flag=1
             if flag==0: break
-        points.append([[xorg,yorg]]+[pointstemp]+[[i[0],i[1]]]+[pointstemp[::-1]]+[[xorg,yorg]])
+        points.append([[xorg,yorg]]+pointstemp+[[i[0],i[1]]]+pointstemp[::-1]+[[xorg,yorg]])
 
 
 
@@ -194,7 +197,7 @@ def blob__Detec__location(image):
 
 
 foodList=[]; woodList=[]; townList=[]; riverList=[]; points=[]
-img=cv2.imread("2.png",cv2.IMREAD_COLOR)
+img=cv2.imread("1.png",cv2.IMREAD_COLOR)
 globx=globx2=0; globy=globy2=0
 
 blob=blob__Detec(img)
@@ -203,9 +206,8 @@ centroid=blob__Detec__location(blob)
 HSV = cv2.cvtColor(centroid, cv2.COLOR_BGR2HSV)
 Red={'min':(0,100,100),'max':(20,255,255)}
 red=cv2.inRange(HSV,Red['min'],Red['max'])
-params = cv2.SimpleBlobDetector_Params()
-detector=cv2.SimpleBlobDetector(params)
-rivers=detector.detect(255-red)
+params = cv2.SimpleBlobDetector()
+rivers=params.detect(255-red)
 for i in rivers:
                 x=i.pt[0]; y=i.pt[1]
                 riverList.append([x,y])
