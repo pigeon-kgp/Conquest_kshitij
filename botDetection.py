@@ -6,6 +6,11 @@ from time import time
 distanceThreshold=0
 distanceThreshold_4_goal=0
 file="/dev/ttyACM0"
+def pathList(getList):
+    while(i+1<len(getList)):
+        i=0
+        botMove(getList[i][0],getList[i+1][1],getList[i+1][2])
+        i+=1
 
 def distance(line,point):
     point1=line[0]
@@ -34,7 +39,7 @@ def move(theta):
         d='a'
     else :
         d='d'
-        
+
     th=abs(theta)
 
     startTime=time()
@@ -67,14 +72,14 @@ cap = cv2.VideoCapture(0)
 
 def botMove(pointS,pointE,ledBlink=0):
     line=[pointS,pointE]
-    
+
     while(True):
         ret, frame = cap.read()
 
         front,back,center=botdetect(frame)
         cv2.line(frame,tuple(center),tuple(front),(255,0,255),1)
         cv2.line(frame,tuple(center),tuple(end),(0,255,255),1)
-        
+
         #chcking if it is present at the goal
         GoalDistance=sqrt((pointE[1]-center[1])**2 + (pointE[0]-center[0])**2)
         if  GoalDistance < distanceThreshold_4_goal:
@@ -82,7 +87,7 @@ def botMove(pointS,pointE,ledBlink=0):
                 motorWrite('b')
             motorWrite('0')
             return True
-        
+
         DFront=distance(line,front)
         DCenter=distance(line,center)
         DBack=distance(line,back)
@@ -92,14 +97,14 @@ def botMove(pointS,pointE,ledBlink=0):
             theta=180
         if Dback > DCenter > DFront :
             theta=0
-        
+
         if Dback > DCenter < DFront :
-            if abs(DCenter) < distanceThreshold : 
+            if abs(DCenter) < distanceThreshold :
                 theta=0
             else:
                 theta=
-        
-        
+
+
         move(theta)
         cv2.imshow('bot',frame)
         if cv2.waitKey(1) & 0xFF == 27:

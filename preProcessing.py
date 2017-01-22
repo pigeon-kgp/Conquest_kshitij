@@ -5,7 +5,8 @@ from math import pow
 from copy import copy
 import os
 foodList=[]; woodList=[]; townList=[]; riverList=[]; points=[]
-distThresh=0.1
+#for 1.png, set it to 1e-12, for 2.png set it to -14
+distThresh=0
 
 def plotLine(x1,y1,x2,y2):
     try:
@@ -13,13 +14,13 @@ def plotLine(x1,y1,x2,y2):
         c=y2-m*x2
         x=x1; y=y1; count=0.01
         if (x2<x1): count=-0.01
-        olddist=Dist(x,y,x2,y2)
+        olddist=Dist(int(x),int(y),int(x2),int(y2))
         while (True):
             y=(m*x+c)
-            if (Dist(x,y,x2,y2)>olddist+distThresh or Dist(x,y,x2,y2)<8):
+            if (Dist(int(x),int(y),int(x2),int(y2))>olddist+distThresh):
                 return
             else:
-                olddist=Dist(x,y,x2,y2)
+                olddist=Dist(int(x),int(y),int(x2),int(y2))
             centroid[int(y),int(x)]=[255,255,0]
             x+=count
     except:
@@ -38,13 +39,9 @@ def Disth(item):
         else:
             return dist
 def Distn(item):
-        dist=sqrt(((globx2-globx)**2)+((globy2-globy)**2))
+        dist=sqrt(((globx2-item[0])**2)+((globy2-item[1])**2))
         return dist
 def Dist(x1,y1,x2,y2):
-        if (type(x1) is list): print x1
-        if (type(x2) is list): print x2
-        if (type(y1) is list): print y1
-        if (type(y2) is list): print y2
         return (sqrt((x1-x2)**2+(y1-y2)**2))
 
 def clearance(xorg,yorg,xfin,yfin):
@@ -53,15 +50,16 @@ def clearance(xorg,yorg,xfin,yfin):
             c=yfin-m*xfin
             x=xorg; y=yorg; count=0.01
             if (xfin<xorg): count=-0.01
-            olddist=Dist(x,y,xfin,yfin)
+            olddist=Dist(int(x),int(y),int(xfin),int(yfin))
             while (True):
                 y=(m*x+c)
                 if (centroid[int(y),int(x)][0]==255 and centroid[int(y),int(x)][1]==255 and centroid[int(y),int(x)][2]==255):
                     return ([int(x),int(y)])
-                if (Dist(x,y,xfin,yfin)>olddist+distThresh or Dist(x,y,xfin,yfin)<8):
+                if (Dist(int(x),int(y),int(xfin),int(yfin))>olddist+distThresh):
+                    print Dist(int(x),int(y),int(xfin),int(yfin))-olddist
                     return 1
                 else:
-                    olddist=Dist(x,y,xfin,yfin)
+                    olddist=Dist(int(x),int(y),int(xfin),int(yfin))
                 #centroid[int(y),int(x)]=[255,255,0]
                 x+=count
         except:
@@ -85,24 +83,29 @@ def pathPlanning(town):
     xorg=town[0]; yorg=town[1]; flag=0
     for i in netList:
         #print i
-        if (int(i[0])==487): break
+        flag=0
+        if (int(i[0])>=480): continue
         pointstemp=[]; riverHere=copy(riverList)
+        xfin=i[0]; yfin=i[1]
+        globx2=xfin; globy2=yfin
+        riverHere.sort(key=Distn)
         while(True):
-            xfin=i[0]; yfin=i[1]
             if flag==0:
                 place=clearance(xorg,yorg,xfin,yfin)
             else:
-                place=clearance(globx,globy,xfin,yfin)
+                place=clearance(pointstemp[len(pointstemp)-1][0],pointstemp[len(pointstemp)-1][1],xfin,yfin)
             if (type(place) is int):
                 flag=0
             else:
-                globx=place[0]; globy=place[1]
-                globx2=xfin; globy2=yfin
-                riverHere.sort(key=Distn)
+                #globx=place[0]; globy=place[1]
                 for j in riverHere:
-                    check=clearance(xorg,yorg,j[0],j[1])
+                    if (len(pointstemp)>=1):
+                        check=clearance(pointstemp[len(pointstemp)-1][0],pointstemp[len(pointstemp)-1][1],j[0],j[1])
+                    else:
+                        check=clearance(xorg,yorg,j[0],j[1])
                     if (type(check) is int):
-                        globx=j[0]; globy=j[1]
+                        #globx=j[0]; globy=j[1]
+                        print "Yo!"
                         pointstemp.append([j[0],j[1]])
                         riverHere.remove(j)
                         break
@@ -251,7 +254,7 @@ def blob__Detec__location(image):
 
 
 
-img=cv2.imread("2.png",cv2.IMREAD_COLOR)
+img=cv2.imread("1.png",cv2.IMREAD_COLOR)
 globx=globx2=0; globy=globy2=0
 
 blob=blob__Detec(img)
