@@ -5,52 +5,83 @@ from math import pow
 from copy import copy
 import os
 foodList=[]; woodList=[]; townList=[]; riverList=[]; points=[]
+distThresh=0.1
 
-def Disth(item):
-    dist=sqrt(((item[0]-townList[0][0])**2)+((item[1]-townList[0][1])**2))
-    if item[2]=="food":
-        return dist*0.75
-    else:
-        return dist
-def Distn(item):
-    dist=sqrt(((globx2-globx)**2)+((globy2-globy)**2))
-    return dist
-def Dist(x1,y1,x2,y2):
-    return (sqrt((x1-x2)**2+(y1-y2)**2))
-
-def clearance(xorg,yorg,xfin,yfin):
+def plotLine(x1,y1,x2,y2):
     try:
-        m=float(yfin-yorg)/(xfin-xorg)
-        c=yfin-m*xfin
-        x=xorg; y=yorg; count=1
-        if (xfin<xorg): count=-1
-        olddist=Dist(x,y,xfin,yfin)
+        m=float(y2-y1)/(x2-x1)
+        c=y2-m*x2
+        x=x1; y=y1; count=0.01
+        if (x2<x1): count=-0.01
+        olddist=Dist(x,y,x2,y2)
         while (True):
             y=(m*x+c)
-            if (centroid[int(y),int(x)][0]==255 and centroid[int(y),int(x)][1]==255 and centroid[int(y),int(x)][2]==255):
-                return ([int(x),int(y)])
-            if (Dist(x,y,xfin,yfin)<olddist-2 or Dist(x,y,xfin,yfin)<8):
-                return 1
+            if (Dist(x,y,x2,y2)>olddist+distThresh or Dist(x,y,x2,y2)<8):
+                return
             else:
-                olddist=Dist(x,y,xfin,yfin)
+                olddist=Dist(x,y,x2,y2)
             centroid[int(y),int(x)]=[255,255,0]
             x+=count
     except:
-        x=xorg; y=yorg; count=1
-        if (yfin<yorg): count=-1
+        x=x1; y=y1; count=1
+        if (y2<y1): count=-1
         while (True):
+            if Dist(x,y,x2,y2)<8:
+                return
+            centroid[int(y),int(x)]=[255,255,0]
+            y+=count
+
+def Disth(item):
+        dist=sqrt(((item[0]-townList[0][0])**2)+((item[1]-townList[0][1])**2))
+        if item[2]=="food":
+            return dist*0.75
+        else:
+            return dist
+def Distn(item):
+        dist=sqrt(((globx2-globx)**2)+((globy2-globy)**2))
+        return dist
+def Dist(x1,y1,x2,y2):
+        if (type(x1) is list): print x1
+        if (type(x2) is list): print x2
+        if (type(y1) is list): print y1
+        if (type(y2) is list): print y2
+        return (sqrt((x1-x2)**2+(y1-y2)**2))
+
+def clearance(xorg,yorg,xfin,yfin):
+        try:
+            m=float(yfin-yorg)/(xfin-xorg)
+            c=yfin-m*xfin
+            x=xorg; y=yorg; count=0.01
+            if (xfin<xorg): count=-0.01
+            olddist=Dist(x,y,xfin,yfin)
+            while (True):
+                y=(m*x+c)
                 if (centroid[int(y),int(x)][0]==255 and centroid[int(y),int(x)][1]==255 and centroid[int(y),int(x)][2]==255):
                     return ([int(x),int(y)])
-                if Dist(x,y,xfin,yfin)<8:
+                if (Dist(x,y,xfin,yfin)>olddist+distThresh or Dist(x,y,xfin,yfin)<8):
                     return 1
-                centroid[int(y),int(x)]=[255,255,0]
-                y+=count
+                else:
+                    olddist=Dist(x,y,xfin,yfin)
+                #centroid[int(y),int(x)]=[255,255,0]
+                x+=count
+        except:
+            x=xorg; y=yorg; count=1
+            if (yfin<yorg): count=-1
+            while (True):
+                    if (centroid[int(y),int(x)][0]==255 and centroid[int(y),int(x)][1]==255 and centroid[int(y),int(x)][2]==255):
+                        return ([int(x),int(y)])
+                    if Dist(x,y,xfin,yfin)<8:
+                        return 1
+                    #centroid[int(y),int(x)]=[255,255,0]
+                    y+=count
 
 def pathPlanning(town):
     global foodList; global woodList
     netList=foodList+woodList
     netList.sort(key=Disth)
     print "\nNet: "+str(netList)
+    print "eurhfuehfiehfkefkejfiej"+str(len(netList))
+    print "otherwise: "+str(len(woodList))
     xorg=town[0]; yorg=town[1]; flag=0
     for i in netList:
         #print i
@@ -77,7 +108,8 @@ def pathPlanning(town):
                         break
                 flag=1
             if flag==0: break
-        points.extend([[xorg,yorg],pointstemp,[i[0],i[1]],1,pointstemp[::-1],[xorg,yorg],1])
+        points.extend([[xorg,yorg]]+pointstemp+[[i[0],i[1]],1]+pointstemp[::-1]+[[xorg,yorg]]+[1])
+        #points.extend([[xorg,yorg]]+pointstemp+[[i[0],i[1]],1]+pointstemp[::-1]+[[xorg,yorg]]+[1])
 
 
 
@@ -105,6 +137,8 @@ def blob__Detec(image):
     Yellow={'min':(20,100,100),'max':(30, 255, 255)}
     Blue={'min':(50,100,100),'max':(100,255,255)}
     Brown={'min':(0,100,0),'max':(20,255,255)}
+
+
 
     mask_b=cv2.inRange(HSV,Blue['min'],Blue['max'])
     mask_br=cv2.inRange(HSV,Brown['min'],Brown['max'])
@@ -138,6 +172,17 @@ def blob__Detec__location(image):
     yellow=cv2.inRange(HSV,Yellow['min'],Yellow['max'])
     blue=cv2.inRange(HSV,Blue['min'],Blue['max'])
     brown=cv2.inRange(HSV,Brown['min'],Brown['max'])
+
+    #cv2.imwrite("toread2.jpg",yellow)
+
+    """
+    os.system("./shapelen")
+    myfile=open("rivers.txt",'r')
+    while(1):
+        line=myfile.readline()
+        if not line: break
+        riverList.append([int(line.split(' ')[0]),int(line.split(' ')[1])])
+    """
 
     params = cv2.SimpleBlobDetector_Params()
     params.filterByArea = True
@@ -222,7 +267,7 @@ red=cv2.inRange(HSV,Red['min'],Red['max'])
 #                riverList.append([x,y])
 
 cv2.imwrite("toread.jpg",red)
-os.system("./shapeslope")
+os.system("./shapelen")
 myfile=open("rivers.txt",'r')
 while(1):
     line=myfile.readline()
@@ -236,6 +281,18 @@ print "\nWood: "+str(woodList)
 print "\nTown: "+str(townList)
 print "\nRiver: "+str(riverList)
 pathPlanning(townList[0])
+while(True):
+    try:
+        points.remove([])
+    except:
+        break
 print "\nPath: "+str(points)
+i=0; j=1
+while(1):
+    if (type(points[j]) is int): j+=1
+    if (j>=len(points)):
+        break
+    plotLine(points[i][0],points[i][1],points[j][0],points[j][1])
+    i=j;j+=1
 cv2.imshow('centroid',centroid)
 cv2.waitKey(0)
