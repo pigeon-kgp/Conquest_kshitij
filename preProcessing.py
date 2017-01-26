@@ -5,6 +5,15 @@ from math import pow
 from copy import copy
 import os
 import colorsys
+
+Yellow={'min':(20,100,100),'max':(30, 255, 255)}
+Blue={'min':(50,100,100),'max':(100,255,255)}
+Brown={'min':(0,100,0),'max':(20,255,255)}
+'''
+Yellow={'min':(16,90,116),'max':(28, 138, 250)}
+Blue={'min':(92,41,79),'max':(109,58,256)}
+Brown={'min':(1,78,120),'max':(12,114,129)}
+'''
 foodList=[]; woodList=[]; townList=[]; riverList=[]; points=[]
 globx=globx2=0; globy=globy2=0
 #for 1.png, set it to 1e-12, for 2.png set it to -14
@@ -263,10 +272,7 @@ def blob__Detec__location(image):
     height, width, channels = img.shape
     new_img=np.ones((height,width,channels), np.uint8)
     HSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    Yellow={'min':(20,100,100),'max':(30, 255, 255)}
-    Blue={'min':(50,100,100),'max':(100,255,255)}
-    Brown={'min':(0,100,0),'max':(20,255,255)}
-
+    global Yellow, Blue, Brown
     yellow=cv2.inRange(HSV,Yellow['min'],Yellow['max'])
     blue=cv2.inRange(HSV,Blue['min'],Blue['max'])
     brown=cv2.inRange(HSV,Brown['min'],Brown['max'])
