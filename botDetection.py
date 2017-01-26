@@ -42,7 +42,7 @@ def distance(line,point):
     point2=line[1]
     dist=(point2[0]-point1[0])*(point[1]-point1[1])-(point2[1]-point1[1])*(point[0]-point1[0])
     ss=sqrt((point2[1]-point1[1])**2 + (point2[0]-point1[0])**2)
-    if not s==0:
+    if not ss==0:
         return float(dist)/ss
     else:
 	return 0
