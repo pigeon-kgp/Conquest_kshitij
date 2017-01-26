@@ -5,6 +5,8 @@ from math import pow
 from copy import copy
 import os
 import colorsys
+img=cv2.imread("3.jpg",cv2.IMREAD_COLOR)
+
 
 Yellow={'min':(20,100,100),'max':(30, 255, 255)}
 Blue={'min':(50,100,100),'max':(100,255,255)}
@@ -14,6 +16,8 @@ Yellow={'min':(16,90,116),'max':(28, 138, 250)}
 Blue={'min':(92,41,79),'max':(109,58,256)}
 Brown={'min':(1,78,120),'max':(12,114,129)}
 '''
+
+
 foodList=[]; woodList=[]; townList=[]; riverList=[]; points=[]
 globx=globx2=0; globy=globy2=0
 #for 1.png, set it to 1e-12, for 2.png set it to -14
@@ -375,7 +379,7 @@ def diff(first, second):
 
 
 
-img=cv2.imread("2.png",cv2.IMREAD_COLOR)
+
 
 
 blob=blob__Detec(img)
@@ -398,7 +402,8 @@ while(1):
     if not line: break
     riverList.append([int(line.split(' ')[0]),int(line.split(' ')[1])])
 myfile.close()
-riverList.remove([int(townList[0][0]),int(townList[0][1])])
+try:  riverList.remove([int(townList[0][0]),int(townList[0][1])])
+except: pass
 cv2.imshow('reds',red)
 cv2.imshow('image',blob)
 for i in foodList:

@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 from time import time
 from copy import copy
+from math import sqrt
 
 distanceThreshold=0
 distanceThreshold_4_goal=0
@@ -9,14 +10,23 @@ turningTreshold=0
 
 file="/dev/ttyACM0"
 
-ORANGE={'min':(8,119,223),'max':(11,118,229)}
-PINK={'min':(158,126,196),'max':(162,106,211)}
+ORANGE={'min':(5,50,223),'max':(15,118,250)}
+PINK={'min':(150,70,140),'max':(165,150,221)}
 
-orange={'min':(8,119,223),'max':(11,118,229)}
-pink={'min':(158,126,196),'max':(162,106,211)}
+orange={'min':(5,50,223),'max':(15,118,250)}
+pink={'min':(150,50,120),'max':(165,140,221)}
 
 WindowName='botImage'
 
+cv2.namedWindow("timon")
+def getcolor(event,x,y,flags,param):
+        if event == cv2.EVENT_LBUTTONDBLCLK:
+            HSV = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+            color=HSV[y,x]
+            print color
+            cv2.waitKey(0)
+
+cv2.setMouseCallback('timon',getcolor)
 
 def change():
  global ORANGE,orange,PINK,pink
@@ -31,12 +41,12 @@ def change():
 
  TrackbarPos = cv2.getTrackbarPos('Pinkmax', WindowName)
  pink['max'][0]=PINK['max'][0]+TrackbarPos
-
+'''
 cv2.createTrackbar('Orangemin',WindowName,0,50,change)
 cv2.createTrackbar('Orangemax',WindowName,0,50,change)
 cv2.createTrackbar('Pinkmin',WindowName,0,50,change)
 cv2.createTrackbar('Pinkmax',WindowName,0,50,change)
-
+'''
 def distance(line,point):
     point1=line[0]
     point2=line[1]
@@ -66,7 +76,7 @@ def move(theta):
         d='a'
     else :
         d='d'
-        
+
     th=abs(theta)
 
     startTime=time()
@@ -80,33 +90,87 @@ def botdetect(image):
     global ORANGE,orange,PINK,pink
     img=copy(image)
 
+
     #new_img=copy(newimg)
     height, width, channels = img.shape
-    new_img=np.ones((height,width,channels), np.uint8)
+    #new_img=np.ones((height,width,channels), np.uint8)
     HSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    
+
     orange_part=cv2.inRange(HSV,orange['min'],orange['max'])
+    global pink_part
     pink_part=cv2.inRange(HSV,pink['min'],pink['max'])
-    
-    new_img=cv2.add(pink,orange)
 
-    height, width, channels = new_img.shape
+    #new_img=cv2.add(pink_part,orange_part)
+    #cv2.imshow("haha",new_img)
+    #cv2.waitKey(1)
+    #height, width, channels = new_img.shape
     fx = fy = f = bx = by = b = 0.1
-    new_img=cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
+    #new_img=cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
+    count=0
+    print "new_img"
+    params = cv2.SimpleBlobDetector_Params()
+    params.filterByArea = True
+    params.minArea=1
+    params.maxArea=4
+    detector=cv2.SimpleBlobDetector(params)
+    pinky=detector.detect(255-pink_part)
+    orangy=detector.detect(255-orange_part)
+    cv2.imshow("pinky",pink_part+orange_part)
+    cv2.waitKey(1)
+    print pinky,orangy
+    kpx=kpy=korx=kory=0
+    for kpink in pinky:
+        kpx+=kpink.pt[0]
+        kpy+=kpink.pt[1]
+    try:
+        kpx/=len(pinky)
+        kpy/=len(pinky)
+    except:
+        
+        return -1,-1,-1
 
+    for korange in orangy:
+        korx+=korange.pt[0]
+        kory+=korange.pt[1]
+    try:
+        korx/=len(orangy)
+        kory/=len(orangy)
+    except:
+        return -1,-1,-1
+    try:
+
+        pointf=[int(kpx),int(kpy)]
+        pointb=[int(korx),int(kory)]
+        point=[int((kpx+korx)/2),int((kpy+kory)/2)]
+        print("Peace!")
+        cv2.waitKey(1)
+
+    except:
+        return -1, -1, -1
+
+    '''
     for y in range(height):
         for x in range(width):
-            if new_img[y,x][0] < pink['max'][0] and new_img[y,x][0] > pink['min'][0]  :
+            #if pink_part[y,x] <= pink['max'][0] and pink_part[y,x][0] > pink['min'][0]  :
+            if pink_part[y,x] <= 3  :
+                count+=1
                 fx+=y
                 fy+=x
                 f+=1
-            if new_img[y,x][0] < orange['max'][0] and new_img[y,x][0] > orange['min'][0]:
+            #if orange_part[y,x] < orange['max'][0] and orange_part[y,x] > orange['min'][0]:
+            if orange_part[y,x] <= 3  :
+                count+=1
                 bx+=y
                 by+=x
                 b+=1
-    pointf = [fx/f,fy/f]
-    pointb = [bx/b,by/b]
-    point = [0.5*(fx/f+bx/b),0.5*(fy/f+by/b)]
+    if count==0:
+
+        return -1,-1,-1
+    pointf = [int(fx/f),int(fy/f)]
+    pointb = [int(bx/b),int(by/b)]
+    point = [int(0.5*(fx/f+bx/b)),int(0.5*(fy/f+by/b))]
+    '''
+    print "returned"
     return pointf,pointb,point
 
 
@@ -118,26 +182,29 @@ def PathTracer(path):
         point2 = path[i+1]
         botMove(point1,point2)
         i+= 1
-    
 
-cap  =  cv2.VideoCapture('conq2.webm')
+
+cap  =  cv2.VideoCapture('./abc2.mp4')
 
 def botMove(pointS,pointE):
     line = [pointS,pointE]
     ledBlink = pointE[2]
     while(True):
+        global frame
         ret, frame  =  cap.read()
         motorWrite('S')
 
-        cv2.imshow(WindowName,frame)
+        cv2.imshow("timon",frame)
+        print "1"
         if cv2.waitKey(1) & 0xFF == 27:
             break
 
         front,back,center=botdetect(frame)
-
+        if front==-1: continue
+        print "2"
         cv2.line(frame,tuple(center),tuple(front),(255,0,255),1)
-        cv2.line(frame,tuple(center),tuple(end),(0,255,255),1)
-        
+        cv2.line(frame,tuple(center),tuple(back),(0,255,255),1)
+        print "3"
         #chcking if bot is present at the goal
         GoalDistance=sqrt((pointE[1]-center[1])**2 + (pointE[0]-center[0])**2)
         if  GoalDistance < distanceThreshold_4_goal:
@@ -146,11 +213,11 @@ def botMove(pointS,pointE):
                 motorWrite('b')
             #motorWrite('0')
             return True
-        
+
         DFront=distance(line,front)
         DCenter=distance(line,center)
         DBack=distance(line,back)
-
+        print "4"
         #moving the bot along te line
         if DBack < DCenter < DFront :
             print('back')
@@ -158,9 +225,9 @@ def botMove(pointS,pointE):
         if DBack > DCenter > DFront :
             print('forward')
             motorWrite('w')
-        
+        print "5"
         if DBack > DCenter < DFront :
-            if abs(DCenter) < distanceThreshold : 
+            if abs(DCenter) < distanceThreshold :
             	print('forward')
                 motorWrite('w')
             elif DFront-DBack >= turningThreshold:
@@ -169,8 +236,8 @@ def botMove(pointS,pointE):
             elif DBack-DFront >= turningThreshold:
                 print('right')
             	motorWrite('d')
-        
-        
+        print "6"
+
         #move(theta)
 
         cv2.imshow(WindowName,frame)
