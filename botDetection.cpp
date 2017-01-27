@@ -1,17 +1,13 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
-#include<limits.h>
-#include <ctype.h>
-#include <stdio.h>
-#include <string.h>
-#include <iostream>
+#include<bits/stdc++.h>
 
 using namespace cv;
 using namespace std;
 
 int botMove(int pointS[],int pointE[]);
 int motorWrite(char d);
-int botdetect(Mat *image);
+int botdetect(Mat image);
 
 int FrontX, FrontY, BackX, BackY;
 int midX,midY;
@@ -28,13 +24,15 @@ int pHighV = 255;
 
 
 int oLowH = 0;
-int oHighH = 179;
+int oHighH = 0;
 int oLowS = 0;
-int oHighS = 255;
+int oHighS = 181;
 int oLowV = 0;
 int oHighV = 255;
 int distanceThreshold_4_goal;
 int turningThreshold;
+int distanceThreshold;
+Mat image;
 /*
 double distance(line,point):
     point1=line[0]
@@ -54,7 +52,7 @@ int distance(int point1[],int point2[])
     DFront=(point2[0]-point1[0])*(BackY-point1[1])-(point2[1]-point1[1])*(BackX-point1[0]);
     return 1;
   }
-  catch
+  catch (...)
   {
     return 0;
   }
@@ -66,7 +64,7 @@ int botMove(int pointS[],int pointE[])
   double GoalDistance=INT_MAX;
   int ledBlink=pointE[2];
   //Mat frame;
-  VideoCapture cap('conq2.webm');
+  VideoCapture cap("abc.webm");
   if(!cap.isOpened())
       return -1;
   for(;;)
@@ -80,8 +78,8 @@ int botMove(int pointS[],int pointE[])
         continue;
 
 
-      cvLine(frame,cvPoint(FrontX,FrontY),cvPoint(midX,midY),CV_RGB(0,255,0),1,8);
-      cvLine(frame,cvPoint(midX,midY),cvPoint(BackX,FrontY),CV_RGB(0,255,0),1,8);
+      line(frame,cvPoint(FrontX,FrontY),cvPoint(midX,midY),CV_RGB(0,255,0),1,8);
+      line(frame,cvPoint(midX,midY),cvPoint(BackX,BackY),CV_RGB(0,255,0),1,8);
       //GaussianBlur(edges, edges, Size(7,7), 1.5, 1.5);
       //Canny(edges, edges, 0, 30, 3);
       GoalDistance=sqrt(pow(pointE[1]-midY,2) + pow(pointE[0]-midX,2));
@@ -145,21 +143,22 @@ return 1;
 
 int motorWrite(char d)
 {
-  ofstream file (fileName);
-  if (file.is_open())
+  fstream files;
+  files.open(fileName,ios::out);
+  if (files.is_open())
   {
-    file <<d;
-    file.close();
+    files <<d;
+    files.close();
     cout<<d;
     return 1;
   }
   else{
   cout<<"0";
-  return 0
+  return 0;
   }
 }
 
-int botdetect(Mat *image)
+int botdetect(Mat image)
 {
   Mat img_copy;
   img_copy=image.clone();
@@ -177,14 +176,14 @@ int botdetect(Mat *image)
   {
     for(int x=0;x<width;x++)
     {
-      if (pink_part.at<uchar>(y,x)<5)
+      if (pink_part.at<uchar>(y,x)>250)
       {
         flagpink=1;
         fy+=y;
         fx+=x;
         f+=1;
       }
-      if (orange_part.at<uchar>(y,x)<5)
+      if (orange_part.at<uchar>(y,x)>250)
       {
         flagorange=1;
         by+=y;
@@ -193,6 +192,9 @@ int botdetect(Mat *image)
       }
     }
   }
+  cout<<FrontX<<" "<<FrontY<<" "<<BackX<<" "<<BackY<<endl;
+  imshow("abc",pink_part+orange_part);
+  waitKey(1);
   try
   {
     if(flagpink && flagorange)
@@ -204,7 +206,7 @@ int botdetect(Mat *image)
       return 1;
     }
   }
-  catch
+  catch (...)
   {
     return 0;
   }
