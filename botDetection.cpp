@@ -16,19 +16,19 @@ int DCenter,DFront,DBack;
 char fileName[20]="/dev/ttyACM0";
 
 int pLowH = 0;
-int pHighH = 179;
+int pHighH = 153;
 int pLowS = 0;
 int pHighS = 255;
-int pLowV = 0;
-int pHighV = 255;
+int pLowV = 25;
+int pHighV = 237;
 
 
 int oLowH = 0;
 int oHighH = 0;
 int oLowS = 0;
-int oHighS = 181;
-int oLowV = 0;
-int oHighV = 255;
+int oHighS = 167;
+int oLowV = 99;
+int oHighV = 99;
 int distanceThreshold_4_goal;
 int turningThreshold;
 int distanceThreshold;
