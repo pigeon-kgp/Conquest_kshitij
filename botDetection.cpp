@@ -25,10 +25,10 @@ int pHighV = 237;
 
 int oLowH = 0;
 int oHighH = 0;
-int oLowS = 0;
-int oHighS = 167;
-int oLowV = 99;
-int oHighV = 99;
+int oLowS = 40;
+int oHighS = 67;
+int oLowV = 0;
+int oHighV = 97;
 int distanceThreshold_4_goal;
 int turningThreshold;
 int distanceThreshold;
