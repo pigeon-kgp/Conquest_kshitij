@@ -222,22 +222,22 @@ int main()
   namedWindow("frame",WINDOW_NORMAL);
   namedWindow("preprocessed",WINDOW_NORMAL);
   namedWindow("choose",WINDOW_NORMAL);
-  cvCreateTrackbar("YellowLowH", "Control", &yLowH, 17); //Hue (0 - 179)
-  cvCreateTrackbar("YellowHighH", "Control", &yHighH, 17);
-  cvCreateTrackbar("YellowLowS", "Control", &yLowS, 255); //Saturation (0 - 255)
-  cvCreateTrackbar("YellowHighS", "Control", &yHighS, 255);
-  cvCreateTrackbar("YellowLowV", "Control", &yLowV, 255); //Value (0 - 255)
-  cvCreateTrackbar("YellowHighV", "Control", &yHighV, 255);
+  cvCreateTrackbar("YellowLowH", "Control", &yhL, 17); //Hue (0 - 179)
+  cvCreateTrackbar("YellowHighH", "Control", &yhH, 17);
+  cvCreateTrackbar("YellowLowS", "Control", &ysL, 255); //Saturation (0 - 255)
+  cvCreateTrackbar("YellowHighS", "Control", &ysH, 255);
+  cvCreateTrackbar("YellowLowV", "Control", &yvL, 255); //Value (0 - 255)
+  cvCreateTrackbar("YellowHighV", "Control", &yvH, 255);
   setMouseCallback("preprocessed", onClick, NULL);
   setMouseCallback("choose", onClick_rec, NULL);
 
 
-  cvCreateTrackbar("BrownLowH", "Control2", &brLowH, 19); //Hue (0 - 179)
-  cvCreateTrackbar("BrownHighH", "Control2", &brHighH, 17);
-  cvCreateTrackbar("BrownLowS", "Control2", &brLowS, 255); //Saturation (0 - 255)
-  cvCreateTrackbar("BrownHighS", "Control2", &brHighS, 255);
-  cvCreateTrackbar("BrownLowV", "Control2", &brLowV, 255); //Value (0 - 255)
-  cvCreateTrackbar("BrownHighV", "Control2", &brHighV, 255);
+  cvCreateTrackbar("BrownLowH", "Control2", &bhL, 19); //Hue (0 - 179)
+  cvCreateTrackbar("BrownHighH", "Control2", &bhH, 17);
+  cvCreateTrackbar("BrownLowS", "Control2", &bsL, 255); //Saturation (0 - 255)
+  cvCreateTrackbar("BrownHighS", "Control2", &bsH, 255);
+  cvCreateTrackbar("BrownLowV", "Control2", &bvL, 255); //Value (0 - 255)
+  cvCreateTrackbar("BrownHighV", "Control2", &bvH, 255);
 
   cvCreateTrackbar("Area cutoff max", "Control3", &AreaCut, 5000);
   cvCreateTrackbar("Area cutoff min", "Control3", &AreaCut2, 5000);
