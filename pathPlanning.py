@@ -129,8 +129,8 @@ def pathPlanning():
         while(True):
             try:
                 print str(pointstemp[q])+"    "+ str(pointstemp[q+1])
-                x=clearance(townList[0][0],townList[0][1],pointstemp[q][0],pointstemp[q][1])
-                xnext=clearance(townList[0][0],townList[0][1],pointstemp[q+1][0],pointstemp[q+1][1])
+                x=clearance(town[0],town[1],pointstemp[q][0],pointstemp[q][1])
+                xnext=clearance(town[0],town[1],pointstemp[q+1][0],pointstemp[q+1][1])
                 print str(x)+"    "+str(xnext)
                 if (x == 1) and (xnext == 1):
                     pointstemp.remove(pointstemp[q])
@@ -138,8 +138,8 @@ def pathPlanning():
             except:
                 break
             q+=1
-        points.extend([[xorg,yorg]]+pointstemp+[[i[0],i[1]],1]+pointstemp[::-1]+[[xorg,yorg]]+[1])
-        points.extend([[xorg,yorg]]+pointstemp+[[i[0],i[1]],1]+pointstemp[::-1]+[[xorg,yorg]]+[1])
+        points.extend([[xorg,yorg]]+pointstemp+[[i[0],i[1]],1,[i[0],i[1]]]+pointstemp[::-1]+[[xorg,yorg]]+[1])
+        points.extend([[xorg,yorg]]+pointstemp+[[i[0],i[1]],1,[i[0],i[1]]]+pointstemp[::-1]+[[xorg,yorg]]+[1])
 
 
 def draw():
@@ -261,5 +261,14 @@ while(1):
         break
     plotLine(points[i][0],points[i][1],points[j][0],points[j][1])
     i=j;j+=1
+print "\nPath: "+str(points)
 cv2.imshow("Path",centroid)
 cv2.waitKey(0)
+myfile=open("list.txt","w")
+for i in points:
+    if type(i) is int:
+        myfile.write(str(i)+"\n")
+    else:
+        myfile.write(str(i[0])+"\n")
+        myfile.write(str(i[1])+"\n")
+myfile.close()
