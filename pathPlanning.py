@@ -117,7 +117,7 @@ def pathPlanning():
                         flaghere=0
                         #globx=j[0]; globy=j[1]
                         #print "Yo!"
-                        pointstemp.append([j[0],j[1]])
+                        pointstemp.append([j[0],j[1],0])
                         riverHere.remove(j)
                         flag=1
                         break
@@ -138,8 +138,8 @@ def pathPlanning():
             except:
                 break
             q+=1
-        points.extend([[xorg,yorg]]+pointstemp+[[i[0],i[1]],1,[i[0],i[1]]]+pointstemp[::-1]+[[xorg,yorg]]+[1])
-        points.extend([[xorg,yorg]]+pointstemp+[[i[0],i[1]],1,[i[0],i[1]]]+pointstemp[::-1]+[[xorg,yorg]]+[1])
+        points.extend([[xorg,yorg,0]]+pointstemp+[[i[0],i[1],1],[i[0],i[1],0]]+pointstemp[::-1]+[[xorg,yorg,1]])
+        points.extend([[xorg,yorg,0]]+pointstemp+[[i[0],i[1],1],[i[0],i[1],0]]+pointstemp[::-1]+[[xorg,yorg,1]])
 
 
 def draw():
@@ -253,22 +253,19 @@ print "drawn"
 plot()
 print "plotted"
 pathPlanning()
-i=0; j=1
+print "\nPath: "+str(points)
+j=1
 colorinc=50
 while(1):
-    if ( (points[j]) == 1): j+=1
     if (j>=len(points)):
         break
-    plotLine(points[i][0],points[i][1],points[j][0],points[j][1])
-    i=j;j+=1
-print "\nPath: "+str(points)
+    plotLine(points[j-1][0],points[j-1][1],points[j][0],points[j][1])
+    j+=1
 cv2.imshow("Path",centroid)
 cv2.waitKey(0)
 myfile=open("list.txt","w")
 for i in points:
-    if type(i) is int:
-        myfile.write(str(i)+"\n")
-    else:
         myfile.write(str(i[0])+"\n")
         myfile.write(str(i[1])+"\n")
+        myfile.write(str(i[2])+"\n")
 myfile.close()
