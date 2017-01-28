@@ -74,7 +74,7 @@ def clearance(x1,y1,x2,y2):
 
 
 def pathPlanning():
-    global foodList, woodList, townList, riverList, town
+    global foodList, woodList, townList, riverList, town, points, points2
     global globx2,globy2
     netList=foodList+woodList
     netList.sort(key=Disth)
@@ -140,6 +140,7 @@ def pathPlanning():
             q+=1
         points.extend([[xorg,yorg,0]]+pointstemp+[[i[0],i[1],1],[i[0],i[1],0]]+pointstemp[::-1]+[[xorg,yorg,1]])
         points.extend([[xorg,yorg,0]]+pointstemp+[[i[0],i[1],1],[i[0],i[1],0]]+pointstemp[::-1]+[[xorg,yorg,1]])
+        points2.extend([[xorg,yorg,0]]+pointstemp+[[i[0],i[1],1],[i[0],i[1],0]]+pointstemp[::-1]+[[xorg,yorg,1]])
 
 
 def draw():
@@ -196,7 +197,7 @@ riverList=[]
 woodList=[[236.0, 468.2773132324219, 'wood'], [204.0, 468.2773132324219, 'wood'], [171.0, 468.2773132324219, 'wood'], [486.95709228515625, 359.95709228515625, 'wood'], [281.0, 110.27731323242188, 'wood'], [279.0, 89.27731323242188, 'wood'], [279.0, 69.27731323242188, 'wood']]
 foodList=[[73.5, 339.0, 'food'], [487.0, 330.0, 'food'], [73.5, 309.5, 'food'], [142.0, 44.5, 'food'], [119.0, 44.5, 'food'], [92.0, 44.5, 'food']]
 townList=[]
-points=[]
+points=[]; points2=[]
 
 cap  =  cv2.VideoCapture(0)
 img=cap.read()
@@ -253,6 +254,7 @@ print "drawn"
 plot()
 print "plotted"
 pathPlanning()
+points+=points2
 print "\nPath: "+str(points)
 j=1
 colorinc=50
