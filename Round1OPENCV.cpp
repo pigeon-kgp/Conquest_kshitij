@@ -14,6 +14,7 @@ using namespace std;
 
 //int yhL=14,ysL=80, yvL=106,yhH=18,ysH=100, yvH=126,bhL=1,bsL=60, bvL=110,bhH=3,bsH=80, bvH=130;
 int yhL=255,ysL=255, yvL=255,yhH=0,ysH=0, yvH=0,bhL=1,bsL=60, bvL=110,bhH=3,bsH=80, bvH=130;
+int FhL=255,FsL=255, FvL=255,FhH=0,FsH=0, FvH=0,BhL=1,BsL=60, BvL=110,BhH=3,BsH=80, BvH=130;
 
 int rect[4][2];
 
@@ -85,6 +86,44 @@ void onClick(int event, int x, int y, int flags, void* userdata)
     cout<<endl<<"LowB: "<<::bhL<<" "<<::bsL<<" "<<::bvL<<endl;
     cout<<endl<<"HighB: "<<::bhH<<" "<<::bsH<<" "<<::bvH<<endl;
   }
+  if (event == EVENT_LBUTTONDBLCLK)
+  {
+    printf("%d %d: ", y,x);
+    cout << img.at<Vec3b>(y, x) << endl;
+    if (img.at<Vec3b>(y, x)[0]<(::FhL))
+      ::FhL=img.at<Vec3b>(y, x)[0];
+    if (img.at<Vec3b>(y, x)[0]>(::FhH))
+      ::FhH=img.at<Vec3b>(y, x)[0];
+    if (img.at<Vec3b>(y, x)[1]<(::FsL))
+      ::FsL=img.at<Vec3b>(y, x)[1];
+    if (img.at<Vec3b>(y, x)[1]>(::FsH))
+      ::FsH=img.at<Vec3b>(y, x)[1];
+    if (img.at<Vec3b>(y, x)[2]<(::FvL))
+      ::FvL=img.at<Vec3b>(y, x)[2];
+    if (img.at<Vec3b>(y, x)[2]>(::FvL))
+      ::FvH=img.at<Vec3b>(y, x)[2];
+    cout<<endl<<"LowY: "<<::yhL<<" "<<::ysL<<" "<<::yvL<<endl;
+    cout<<endl<<"HighY: "<<::yhH<<" "<<::ysH<<" "<<::yvH<<endl;
+  }
+  if (event == EVENT_RBUTTONDBLCLK)
+  {
+    printf("%d %d: ", y,x);
+    cout << img.at<Vec3b>(y, x) << endl;
+    if (img.at<Vec3b>(y, x)[0]<(::BhL))
+      ::BhL=img.at<Vec3b>(y, x)[0];
+    if (img.at<Vec3b>(y, x)[0]>(::BhH))
+      ::BhH=img.at<Vec3b>(y, x)[0];
+    if (img.at<Vec3b>(y, x)[1]<(::BsL))
+      ::BsL=img.at<Vec3b>(y, x)[1];
+    if (img.at<Vec3b>(y, x)[1]>(::BsH))
+      ::BsH=img.at<Vec3b>(y, x)[1];
+    if (img.at<Vec3b>(y, x)[2]<(::BvL))
+      ::BvL=img.at<Vec3b>(y, x)[2];
+    if (img.at<Vec3b>(y, x)[2]>(::BvL))
+      ::BvH=img.at<Vec3b>(y, x)[2];
+    cout<<endl<<"LowY: "<<::yhL<<" "<<::ysL<<" "<<::yvL<<endl;
+    cout<<endl<<"HighY: "<<::yhH<<" "<<::ysH<<" "<<::yvH<<endl;
+  }
 }
 int count=0;
 void onClick_rec(int event, int x, int y, int flags, void* userdata)
@@ -153,14 +192,18 @@ int Filter(Mat HSV)
   int height=hsv.size().height;
   int width =hsv.size().width;
 
-  Mat yellow_bin,brown_bin,yellow_part,brown_part;
+  Mat yellow_bin,brown_bin,yellow_part,brown_part,front_part,back_part;
   Mat out_yellow,out_brown;
   inRange(HSV, Scalar(::yhL,::ysL, ::yvL),Scalar(::yhH,::ysH, ::yvH), yellow_part);
   inRange(HSV, Scalar(::bhL,::bsL, ::bvL),Scalar(::bhH,::bsH, ::bvH), brown_part);
+  inRange(HSV, Scalar(::FhL,::FsL, ::FvL),Scalar(::FhH,::FsH, ::FvH), front_part);
+  inRange(HSV, Scalar(::BhL,::BsL, ::BvL),Scalar(::BhH,::BsH, ::BvH), back_part);
+
 
   threshold(yellow_part,yellow_bin,120,255,CV_THRESH_BINARY);
   threshold(brown_part,brown_bin,120,255,CV_THRESH_BINARY);
   imshow("foddd +wood",yellow_part);
+  imshow("bot",front_part+back_part);
   waitKey(1);
 
   plotBlob(yellow_part,yellow_bin,wood,out_yellow,1,AreaCut);
@@ -271,12 +314,15 @@ int main()
         char abc;cin>>abc;
         if ((abc=='y' || abc=='Y'))
         {
-          fstream FOOD,WOOD,TOWN;
+          fstream FOOD,WOOD,TOWN,FRONT,BACK;
           //cout<<"insuidedewaxa"<<rivers.size()<<endl<<endl;
 
           FOOD.open("food.txt",ios::out);
           WOOD.open("wood.txt",ios::out);
           TOWN.open("town.txt",ios::out);
+          FRONT.open("front.txt",ios::out);
+          BACK.open("back.txt",ios::out);
+
           //waitKey(0);
 
 
@@ -298,6 +344,8 @@ int main()
             if (((x>=rect[0][0] || x>=rect[3][0])&&(x<=rect[1][0] || x<=rect[2][0])) && ((y>=rect[0][1] || y>=rect[1][1])&&(y<=rect[2][1] || y<=rect[3][1])))
             TOWN<<towncenter[i].pt.x<<","<<towncenter[i].pt.y<<endl;
           }
+          FRONT<<::FhL<<endl<<::FsL<<endl<<::FvL<<endl<<::FhH<<endl<<::FsH<<endl<<::FvH;
+          BACK<<::BhL<<endl<<::BsL<<endl<<::BvL<<endl<<::BhH<<endl<<::BsH<<endl<<::BvH;
         }
       }
     }
