@@ -11,9 +11,10 @@ int botdetect(Mat image);
 
 int FrontX, FrontY, BackX, BackY;
 int midX,midY;
-int DCenter,DFront,DBack;
+double DCenter,DFront,DBack;
 
 char fileName[20]="/dev/ttyACM0";
+double finalAngle;
 
 int pLowH = 0;
 int pHighH = 153;
@@ -29,9 +30,9 @@ int oLowS = 40;
 int oHighS = 67;
 int oLowV = 0;
 int oHighV = 97;
-int distanceThreshold_4_goal;
-int turningThreshold;
-int distanceThreshold;
+int distanceThreshold_4_goal=70;
+int turningThreshold=20;
+int distanceThreshold=70;
 Mat image;
 /*
 double distance(line,point):
@@ -47,9 +48,32 @@ double distance(line,point):
 int distance(int point1[],int point2[])
 {
   try{
+    double ss=sqrt(pow(point2[1]-point1[1],2) + pow(point2[0]-point1[0],2));
+
     DFront=(point2[0]-point1[0])*(FrontY-point1[1])-(point2[1]-point1[1])*(FrontX-point1[0]);
     DCenter=(point2[0]-point1[0])*(midY-point1[1])-(point2[1]-point1[1])*(midX-point1[0]);
-    DFront=(point2[0]-point1[0])*(BackY-point1[1])-(point2[1]-point1[1])*(BackX-point1[0]);
+    DBack=(point2[0]-point1[0])*(BackY-point1[1])-(point2[1]-point1[1])*(BackX-point1[0]);
+    if (ss>0)
+    {
+      DFront/=ss;
+      DCenter/=ss;
+      DBack/=ss;
+    }
+    double theta1,theta2;
+    try{
+      if (point1[1]==point1[0])
+      return 0;
+      if (FrontX==BackX)
+      return 0;
+    theta1=atan((point2[1]-point1[1])/(point1[1]-point1[0]));
+    theta2=atan((FrontY-BackY)/(FrontX-BackX));
+    }
+    catch(...)
+    {
+      return 0;
+    }
+
+    finalAngle = theta2-theta1;
     return 1;
   }
   catch (...)
@@ -60,7 +84,7 @@ int distance(int point1[],int point2[])
 int botMove(int pointS[],int pointE[])
 {
   namedWindow("Frame",1);
-
+  char s,w;
   double GoalDistance=INT_MAX;
   int ledBlink=pointE[2];
   //Mat frame;
@@ -71,7 +95,7 @@ int botMove(int pointS[],int pointE[])
   {
       Mat frame;
       cap >> frame;
-      motorWrite('S');
+      //motorWrite('S');
       imshow("Frame",frame);
       if(waitKey(30) >= 0) break;
       if(!botdetect(frame))
@@ -94,42 +118,57 @@ int botMove(int pointS[],int pointE[])
       }
       if(!distance(pointS,pointE))
         continue;
+      cout<<DFront<<" "<<" "<<DBack<<" "<<DCenter<<endl<<finalAngle<<endl;
       /*
       DFront=distance(line,front);
       DCenter=distance(line,center);
       DBack=distance(line,back);
       */
+
+      if (FrontX==-1)
+        continue;
+      if (finalAngle<0)
+        {
+          s='w';
+          w='s';
+        }
+        else
+        {
+          w='w';
+          s='s';
+        }
       if (DBack < DCenter && DCenter < DFront)
       {
-          cout<<"back";
-          motorWrite('s');
+          ///cout<<s<<"     ";
+          motorWrite(s);
       }
       if( DBack > DCenter && DCenter > DFront )
       {
-          cout<<"forward";
-          motorWrite('w');
+          //cout<<w<<"     ";
+          motorWrite(w);
       }
 
       if (DBack > DCenter && DCenter< DFront )
       {
           if (abs(DCenter) < distanceThreshold )
           {
-              cout<<"forward";
-              motorWrite('w');
+              //cout<<w<<"     ";
+              motorWrite(w);
           }
           else if( DFront-DBack >= turningThreshold)
           {
-            cout<<"left";
+            //cout<<"a    ";
             motorWrite('a');
           }
           else if (DBack-DFront >= turningThreshold)
           {
-            cout<<"right";
+            //cout<<"d     ";
             motorWrite('d');
           }
       }
       imshow("Frame",frame);
-      if(waitKey(30) >= 0) break;
+
+      if(waitKey(60) >= 0) break;
   }
 return 1;
 }
@@ -149,11 +188,11 @@ int motorWrite(char d)
   {
     files <<d;
     files.close();
-    cout<<d;
+    cout<<d<<endl;
     return 1;
   }
   else{
-  cout<<"0";
+  cout<<"0"<<endl;
   return 0;
   }
 }
@@ -192,7 +231,7 @@ int botdetect(Mat image)
       }
     }
   }
-  cout<<FrontX<<" "<<FrontY<<" "<<BackX<<" "<<BackY<<endl;
+  //cout<<FrontX<<" "<<FrontY<<" "<<BackX<<" "<<BackY<<endl;
   imshow("abc",pink_part+orange_part);
   waitKey(1);
   try
@@ -219,7 +258,12 @@ int main(int, char**)
 {
 
     FrontX=FrontY=BackX=BackY=-1;
-
+    /*cout<<"fileName"<<endl;
+    char qa;
+    cin>>qa;
+    fileName[11]=qa;
+    cout<<"VideoCapture from"<<endl;
+    cin>>qa;*/
     namedWindow("Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 
     cvCreateTrackbar("OrangeLowH", "Control", &oLowH, 179); //Hue (0 - 179)
@@ -241,7 +285,7 @@ int main(int, char**)
     cvCreateTrackbar("PinkLowV", "Control", &pLowV, 255); //Value (0 - 255)
     cvCreateTrackbar("PinkHighV", "Control", &pHighV, 255);
     int a[]={1,2,3};
-    int b[]={2,2,3};
+    int b[]={800,100,3};
     botMove(a,b);
 
 }
