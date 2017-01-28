@@ -178,6 +178,7 @@ def draw():
 
 def plot():
     global woodList, foodList, town
+    print woodList;
     for i in woodList:
         centroid[int(i[1]),int(i[0])]=[0,255,0]
         centroid[int(i[1])+1,int(i[0])+1]=[0,255,0]
@@ -192,12 +193,18 @@ def plot():
     centroid[int(town[1])+1,int(town[0])+1]=[255,255,0]
     centroid[int(town[1])+1,int(town[0])]=[255,255,0]
     centroid[int(town[1]),int(town[0]+1)]=[255,255,0]
+'''
 riverListhere=[[458, 366], [458, 341], [434, 341], [411, 341], [458, 315], [508, 287], [485, 287], [458, 287], [158, 177], [158, 152], [207, 129], [184, 129], [157, 129], [207, 104], [207, 80], [206, 53]]
 riverList=[]
 woodList=[[236.0, 468.2773132324219, 'wood'], [204.0, 468.2773132324219, 'wood'], [171.0, 468.2773132324219, 'wood'], [486.95709228515625, 359.95709228515625, 'wood'], [281.0, 110.27731323242188, 'wood'], [279.0, 89.27731323242188, 'wood'], [279.0, 69.27731323242188, 'wood']]
 foodList=[[73.5, 339.0, 'food'], [487.0, 330.0, 'food'], [73.5, 309.5, 'food'], [142.0, 44.5, 'food'], [119.0, 44.5, 'food'], [92.0, 44.5, 'food']]
+'''
 townList=[]
 points=[]; points2=[]
+riverListhere=[]
+riverList=[]
+woodList=[]
+foodList=[]
 
 cap  =  cv2.VideoCapture(0)
 img=cap.read()
@@ -207,41 +214,41 @@ while(1):
     if cv2.waitKey(1) & 0xFF == 27: break
 height, width, channels=img.shape
 centroid=np.zeros((height,width,channels), np.uint8)
-try:
-    myfile = open("river.txt","r")
-    while(1):
-        line=myfile.readline()
-        if not line: break
-        riverListhere.append(line.split(',')[0],line.split(',')[1])
-    myfile.close()
 
+try:
     myfile=open("wood.txt","r")
     while(1):
         line=myfile.readline()
         if not line: break
-        woodList.append(line.split(',')[0],line.split(',')[1])
+        woodList.append([float(line.split(',')[0]),float(line.split(',')[1][:-1]),"wood"])
     myfile.close()
-
+except:
+    print "Wood is missing."
+try:
     myfile = open("food.txt","r")
     while(1):
         line=myfile.readline()
         if not line: break
-        foodList.append(line.split(',')[0],line.split(',')[1])
+        foodList.append([float(line.split(',')[0]),float(line.split(',')[1][:-1]),"food"])
     myfile.close()
-
+except:
+    print "Food is missing."
+try:
     myfile= open("town.txt","r")
     while(1):
         line=myfile.readline()
+	print line
         if not line: break
-        townList.append(line.split(',')[0],line.split(',')[1])
+        townList.append([float(line.split(',')[0]),float(line.split(',')[1][:-1])])
     myfile.close()
 except:
-    print "Some file is missing."
+    print "Town is missing."
 
 sumx=0; sumy=0
 for i in townList:
-    sumx+=i[0]
-    sumy+=i[1]
+    sumx+=int((i[0]))
+    sumy+=int((i[1]))
+print townList
 try:
  town=[int(sumx/len(townList)),int(sumy/len(townList))]
 except:
