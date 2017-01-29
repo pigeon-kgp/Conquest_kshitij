@@ -1,6 +1,6 @@
 # Conquest_kshitij
 -----------------
-UNDER DEVELOPMENT
+NO LONGER IN DEVELOPMENT
 -----------------
 
 blobdetect working
@@ -9,4 +9,4 @@ bot working
 
 path planning working
 
-second run yet to be implemented
+second run implemented
